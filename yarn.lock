@@ -5477,6 +5477,14 @@ react-native-flip-card@3.5.2:
   dependencies:
     prop-types "^15.5.10"
 
+react-native-icloud-account-status@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-icloud-account-status/-/react-native-icloud-account-status-1.0.1.tgz#2fd27ae8f2bce631c86e2176533b029b9ca91715"
+
+react-native-icloudstore@zzorba/react-native-icloudstore#add_dispatch_mainqueue:
+  version "0.9.0"
+  resolved "https://codeload.github.com/zzorba/react-native-icloudstore/tar.gz/a273de6533e6f0ea2f2b3bf6105e8899a13d2c1f"
+
 react-native-keychain@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/react-native-keychain/-/react-native-keychain-3.0.0.tgz#29da1dfa43c2581f76bf9420914fd38a1558cf18"

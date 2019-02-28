@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { keys } from 'lodash';
 import {
+  Platform,
   SafeAreaView,
   StyleSheet,
   View,
@@ -17,6 +18,7 @@ import { clearDecks } from '../../actions';
 import { fetchCards } from '../cards/actions';
 import { getAllDecks } from '../../reducers';
 import SettingsItem from './SettingsItem';
+import ICloudButton from './ICloudButton';
 import LoginButton from './LoginButton';
 
 const defaultImageCacheManager = ImageCacheManager();
@@ -128,6 +130,7 @@ class SettingsView extends React.Component {
           <SettingsItem onPress={this._myCollectionPressed} text={L('Card Collection')} />
           <SettingsItem onPress={this._editSpoilersPressed} text={L('Spoiler Settings')} />
           { this.renderSyncCards() }
+          <ICloudButton componentId={this.props.componentId} />
           <SettingsItem onPress={this._diagnosticsPressed} text={L('Diagnostics')} />
           <SettingsItem onPress={this._aboutPressed} text={L('About')} />
         </View>

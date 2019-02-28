@@ -30,3 +30,5 @@ export const LOGIN_STARTED = 'LOGIN_STARTED';
 export const LOGIN = 'LOGIN';
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const LOGOUT = 'LOGOUT';
+export const SAVE_TO_ICLOUD = 'SAVED_TO_ICLOUD';
+export const RESTORE_FROM_ICLOUD = 'RESTORE_FROM_ICLOUD';

@@ -11,14 +11,13 @@ import {
 import typography from '../../styles/typography';
 
 export default function SettingsItem({ loading, text, onPress }) {
-  if (loading) {
+  if (loading || !onPress) {
     return (
       <View style={styles.wrapper}>
         <Text style={[typography.text, styles.text]}>{ text }</Text>
-        <ActivityIndicator style={styles.spinner} size="small" animating />
+        { !!loading && <ActivityIndicator style={styles.spinner} size="small" animating /> }
       </View>
     );
-
   }
   return (
     <View style={styles.wrapper}>
@@ -35,9 +34,10 @@ SettingsItem.propTypes = {
 
 const styles = StyleSheet.create({
   wrapper: {
-    padding: 4,
+    paddingLeft: 4,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-start',
     height: 40,
   },
   text: {
