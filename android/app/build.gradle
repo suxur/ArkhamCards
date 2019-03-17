@@ -158,6 +158,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-cross-settings')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     implementation "com.android.support:design:${rootProject.ext.supportLibVersion}"

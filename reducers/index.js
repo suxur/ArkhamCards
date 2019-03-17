@@ -8,7 +8,7 @@ import campaigns from './campaigns';
 import cards from './cards';
 import decks from './decks';
 import packs from './packs';
-import weaknesses from './weaknesses';
+import HybridStorage from './HybridStorage';
 
 const packsPersistConfig = {
   key: 'packs',
@@ -22,9 +22,15 @@ const cardsPersistConfig = {
   blacklist: ['loading', 'error'],
 };
 
+const campaignsPersistConfig = {
+  key: 'campaigns',
+  storage: HybridStorage,
+  blacklist: [],
+};
+
 const decksPersistConfig = {
   key: 'decks',
-  storage,
+  storage: HybridStorage,
   blacklist: ['refreshing', 'error'],
 };
 
@@ -39,8 +45,7 @@ const rootReducer = combineReducers({
   packs: persistReducer(packsPersistConfig, packs),
   cards: persistReducer(cardsPersistConfig, cards),
   decks: persistReducer(decksPersistConfig, decks),
-  campaigns,
-  weaknesses,
+  campaigns: persistReducer(campaignsPersistConfig, campaigns),
   signedIn: persistReducer(signedInPersistConfig, signedIn),
 });
 
@@ -212,11 +217,10 @@ function processCampaign(campaign) {
 }
 
 export function getNextCampaignId(state) {
-  return 1 + (max(map(keys(state.campaigns.all), id => parseInt(id, 10))) || 0);
-}
-
-export function getNextWeaknessId(state) {
-  return 1 + (max(map(values(state.weaknesses.all), set => set.id)) || 0);
+  return 1 + (max(concat(
+    map(keys(state.campaigns.deleted || {}), id => parseInt(id, 10)),
+    map(keys(state.campaigns.all), id => parseInt(id, 10))
+  )) || 0);
 }
 
 export function getCampaign(state, id) {
@@ -240,7 +244,8 @@ export function getNextLocalDeckId(state) {
     map(
       concat(
         keys(state.decks.all),
-        keys(state.decks.replacedLocalIds || {})
+        keys(state.decks.replacedLocalIds || {}),
+        keys(state.decks.deletedLocalIds || {})
       ),
       x => parseInt(x, 10)
     )

@@ -1,10 +1,14 @@
+import { forEach, keys } from 'lodash';
+import { Linking, NativeEventEmitter, Platform, YellowBox } from 'react-native';
 import { Navigation } from 'react-native-navigation';
-import { Linking, YellowBox } from 'react-native';
 import DeepLinking from 'react-native-deep-linking';
+import iCloudStorage from 'react-native-icloudstore';
 
 import L, { changeLocale } from './i18n';
 import { iconsLoaded, iconsMap } from './NavIcons';
 import { COLORS } from '../styles/colors';
+import { REMOTE_DECKS_UPDATE, REMOTE_CAMPAIGNS_UPDATE } from '../actions/types';
+import HybridStorage from '../reducers/HybridStorage';
 
 export default class App {
   constructor(store) {
@@ -12,6 +16,7 @@ export default class App {
     this.currentLang = null;
     store.subscribe(this.onStoreUpdate.bind(this, store));
     this._handleUrl = this.handleUrl.bind(this);
+    this._iCloudStoreChangedRemotely = this.iCloudStoreChangedRemotely.bind(this);
 
     Navigation.setDefaultOptions({
       topBar: {
@@ -30,10 +35,16 @@ export default class App {
       },
     });
 
+    if (Platform.OS === 'ios') {
+      this.eventEmitter = new NativeEventEmitter(iCloudStorage);
+      this.eventEmitter.addListener('iCloudStoreDidChangeRemotely', this._iCloudStoreChangedRemotely);
+    }
+
     this.onStoreUpdate(store);
   }
 
   onStoreUpdate(store) {
+    this.store = store;
     const {
       lang,
     } = store.getState().cards;
@@ -46,6 +57,28 @@ export default class App {
       iconsLoaded.then(() => {
         this.startApp(lang || 'en');
       }).catch(error => console.log(error));
+    }
+  }
+
+  iCloudStoreChangedRemotely(userInfo) {
+    const changedKeys = userInfo.changedKeys;
+    if (changedKeys != null && HybridStorage.iCloudSyncEnabled) {
+      const iCloudKeys = {
+        'persist:decks': REMOTE_DECKS_UPDATE,
+        'persist:campaigns': REMOTE_CAMPAIGNS_UPDATE,
+      };
+      forEach(keys(iCloudKeys), key => {
+        if (changedKeys.includes(key)) {
+          console.log(`ICLOUD: ${key} changed remotely`);
+          iCloudStorage.getItem(key)
+            .then(result => {
+              this.store.dispatch({
+                type: iCloudKeys[key],
+                cloudState: JSON.parse(result),
+              });
+            });
+        }
+      });
     }
   }
 

@@ -10,9 +10,6 @@ import {
   SET_IN_COLLECTION,
   SET_PACK_SPOILER,
   SET_ALL_PACK_SPOILERS,
-  NEW_WEAKNESS_SET,
-  EDIT_WEAKNESS_SET,
-  DELETE_WEAKNESS_SET,
   LOGIN_STARTED,
   LOGIN,
   LOGIN_ERROR,
@@ -22,41 +19,6 @@ import {
 
 import { getAccessToken, signInFlow, signOutFlow } from '../lib/auth';
 import { decks, loadDeck } from '../lib/authApi';
-
-export function createWeaknessSet(id, name, packCodes) {
-  return {
-    type: NEW_WEAKNESS_SET,
-    id,
-    timestamp: new Date(),
-    set: {
-      id,
-      name,
-      packCodes,
-      created: new Date(),
-      assignedCards: {},
-    },
-  };
-}
-
-export function editWeaknessSet(id, name, packCodes, assignedCards) {
-  return {
-    type: EDIT_WEAKNESS_SET,
-    id: id,
-    timestamp: new Date(),
-    name: name || null,
-    packCodes: packCodes || null,
-    assignedCards: assignedCards || null,
-  };
-}
-
-export function deleteWeaknessSet(id) {
-  return {
-    type: DELETE_WEAKNESS_SET,
-    id: id,
-    timestamp: new Date(),
-  };
-}
-
 
 export function login() {
   return (dispatch) => {

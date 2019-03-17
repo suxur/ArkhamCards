@@ -1,25 +1,14 @@
 import {
-  SAVE_TO_ICLOUD,
-  RESTORE_FROM_ICLOUD,
-} from './types';
+  FLUSH,
+} from '../../actions/types';
 
-export function saveToICloud(timestamp) {
+export function flush(iCloudSync) {
   return {
-    type: SAVE_TO_ICLOUD,
-    timestamp,
-  };
-}
-
-export function restoreFromICloud({ timestamp, campaigns, decks }) {
-  return {
-    type: RESTORE_FROM_ICLOUD,
-    timestamp: new Date(timestamp),
-    campaigns,
-    decks,
+    type: FLUSH,
+    iCloudSync,
   };
 }
 
 export default {
-  saveToICloud,
-  restoreFromICloud,
+  flush,
 };

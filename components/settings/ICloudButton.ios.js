@@ -77,12 +77,7 @@ class ICloudButton extends React.Component {
     } = this.state;
     if (loading) {
       return (
-        <SettingsItem text={L('Checking iCloud')} loading />
-      );
-    }
-    if (networkType === 'none') {
-      return (
-        <SettingsItem text={L('iCloud not available without network')} />
+        <SettingsItem text={L('Checking for iCloud access')} loading />
       );
     }
     if (!hasICloud) {
@@ -91,7 +86,7 @@ class ICloudButton extends React.Component {
       );
     }
     return (
-      <SettingsItem onPress={this._onPress} text={L('iCloud Sync')} />
+      <SettingsItem onPress={this._onPress} text={L('iCloud Settings')} />
     );
   }
 }

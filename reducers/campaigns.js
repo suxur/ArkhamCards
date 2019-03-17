@@ -8,6 +8,9 @@ import {
   ADD_CAMPAIGN_SCENARIO_RESULT,
   SET_ALL_CAMPAIGNS,
   REPLACE_LOCAL_DECK,
+  REMOTE_CAMPAIGNS_UPDATE,
+  FLUSH,
+  MIGRATE_CAMPAIGN_DATA,
 } from '../actions/types';
 
 // Campaign: {
@@ -15,6 +18,7 @@ import {
 //   name: '',
 //   cycleCode: '',
 //   lastUpdated: Date,
+//   dateCreated: Date (added later),
 //   showInterludes: true,
 //   baseDeckIds: [],
 //   latestDeckIds: [], /* deprecated */
@@ -62,9 +66,51 @@ import {
 // }
 const DEFAULT_CAMPAIGNS_STATE = {
   all: {},
+  deleted: {
+    // id: dateCreated,
+  },
 };
 
 export default function(state = DEFAULT_CAMPAIGNS_STATE, action) {
+  if (action.type === MIGRATE_CAMPAIGN_DATA) {
+    // This data came from the old-store, so just take it as is.
+    // Should be a one time operation.
+    return Object.assign({}, state, action.state);
+  }
+  if (action.type === REMOTE_CAMPAIGNS_UPDATE) {
+    const newCampaigns = [];
+    const mergedCampaigns = {};
+    forEach(keys(action.cloudState.all || {}), id => {
+      const campaign = action.cloudState.all[id];
+      if (state.all[id]) {
+        if (state.all[id].dateCreated === campaign.dateCreated) {
+          // Same create date, means same campaign.
+          // Keep whichever has a newer update date.
+          if (state.all[id].lastUpdated.getTime() > campaign.lastUpdated.getTime()) {
+            // Local one is newer.
+            mergedCampaigns[id] = state.all[id];
+          } else {
+            mergedCampaigns[id] = campaign;
+          }
+        } else {
+          // They seem to be different campaigns, that somehow have the same ID?
+          mergedCampaigns[id] = state.all[id];
+          newCampaigns.push(campaign);
+        }
+      } else {
+
+      }
+    });
+    deepDiff(state, action.cloudState);
+    return state;
+  }
+  if (action.type === FLUSH) {
+    return Object.assign(
+      {},
+      state,
+      { iCloudSync: action.iCloudSync },
+    );
+  }
   if (action.type === LOGOUT) {
     return DEFAULT_CAMPAIGNS_STATE;
   }
@@ -78,7 +124,12 @@ export default function(state = DEFAULT_CAMPAIGNS_STATE, action) {
     };
   }
   if (action.type === DELETE_CAMPAIGN) {
+    const deleted = Object.assign({}, state.deleted || {});
     const newCampaigns = Object.assign({}, state.all);
+    // TODO: figure out how to encode deleted campaigns.
+    // if (newCampaigns[action.id]) {
+    //  deleted[action.id] = newCampaign[action.id].dateCreated
+    //}
     delete newCampaigns[action.id];
     return Object.assign({},
       state,
@@ -112,6 +163,7 @@ export default function(state = DEFAULT_CAMPAIGNS_STATE, action) {
       campaignNotes,
       weaknessSet: action.weaknessSet,
       baseDeckIds: action.baseDeckIds,
+      dateCreated: action.now,
       lastUpdated: action.now,
       investigatorData: {},
       scenarioResults: [],
@@ -122,7 +174,11 @@ export default function(state = DEFAULT_CAMPAIGNS_STATE, action) {
     );
   }
   if (action.type === UPDATE_CAMPAIGN) {
-    const campaign = Object.assign({}, state.all[action.id], { lastUpdated: action.now });
+    const campaign = Object.assign(
+      {},
+      state.all[action.id],
+      { lastUpdated: action.now }
+    );
     forEach(keys(action.campaign), key => {
       campaign[key] = action.campaign[key];
     });

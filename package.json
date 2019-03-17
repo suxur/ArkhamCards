@@ -29,6 +29,7 @@
     "react-native-blur": "3.2.2",
     "react-native-cached-image": "fungilation/react-native-cached-image#master",
     "react-native-config": "0.11.7",
+    "react-native-cross-settings": "^2.0.1",
     "react-native-deep-linking": "2.2.0",
     "react-native-device-info": "1.0.0",
     "react-native-dialog": "zzorba/react-native-dialog#make_keyboard_avoid_behavior_prop",

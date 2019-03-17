@@ -11,17 +11,22 @@ import {
   UPDATE_DECK,
   CLEAR_DECKS,
   REPLACE_LOCAL_DECK,
+  FLUSH,
 } from '../actions/types';
 
 const DEFAULT_DECK_STATE = {
   all: {},
   myDecks: [],
   replacedLocalIds: {},
+  deletedLocalIds: {
+    // id: date_creation of the deck.
+  },
   dateUpdated: null,
   dateLocalUpdated: null,
   refreshing: false,
   error: null,
   lastModified: null,
+  iCloudSync: false,
 };
 
 function updateDeck(state, action) {
@@ -41,6 +46,13 @@ function sortMyDecks(myDecks, allDecks) {
 }
 
 export default function(state = DEFAULT_DECK_STATE, action) {
+  if (action.type === FLUSH) {
+    return Object.assign(
+      {},
+      state,
+      { iCloudSync: action.iCloudSync },
+    );
+  }
   if (action.type === LOGOUT || action.type === CLEAR_DECKS) {
     const all = {};
     forEach(Object.keys(state.all), id => {
@@ -149,16 +161,22 @@ export default function(state = DEFAULT_DECK_STATE, action) {
     );
   }
   if (action.type === DELETE_DECK) {
+    const deletedLocalIds = Object.assign({}, state.deletedLocalIds || {});
     const all = Object.assign({}, state.all);
     let deck = all[action.id];
     const toDelete = [action.id];
     if (deck) {
+      if (action.id < 0) {
+        deletedLocalIds[action.id] = deck.date_creation;
+      }
       if (action.deleteAllVersions) {
-        console.log('DELETE: all versions');
         while (deck.previous_deck && all[deck.previous_deck]) {
           const id = deck.previous_deck;
           toDelete.push(id);
           deck = all[id];
+          if (deck && id < 0) {
+            deletedLocalIds[id] = deck.date_creation;
+          }
           delete all[id];
         }
       } else {
@@ -182,6 +200,7 @@ export default function(state = DEFAULT_DECK_STATE, action) {
       state,
       {
         all,
+        deletedLocalIds,
         myDecks,
         // There's a bug on ArkhamDB cache around deletes,
         // so drop lastModified when we detect a delete locally.
