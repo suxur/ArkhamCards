@@ -18,6 +18,7 @@ const DEFAULT_DECK_STATE = {
   myDecks: [],
   replacedLocalIds: {},
   dateUpdated: null,
+  dateLocalUpdated: null,
   refreshing: false,
   error: null,
   lastModified: null,
@@ -140,6 +141,8 @@ export default function(state = DEFAULT_DECK_STATE, action) {
       state,
       {
         all,
+        dateUpdated: action.timestamp.getTime(),
+        dateLocalUpdated: action.timestamp.getTime(),
         myDecks: sortMyDecks(myDecks, all),
         replacedLocalIds,
       },
@@ -183,7 +186,9 @@ export default function(state = DEFAULT_DECK_STATE, action) {
         // There's a bug on ArkhamDB cache around deletes,
         // so drop lastModified when we detect a delete locally.
         lastModified: null,
+        dateUpdated: action.timestamp.getTime(),
       },
+      action.id < 0 ? { dateLocalUpdated: action.timestamp.getTime() } : {}
     );
   }
   if (action.type === UPDATE_DECK) {
@@ -196,7 +201,9 @@ export default function(state = DEFAULT_DECK_STATE, action) {
           state.all,
           { [action.id]: deck },
         ),
+        dateUpdated: action.timestamp.getTime(),
       },
+      action.id < 0 ? { dateLocalUpdated: action.timestamp.getTime() } : {},
     );
     if (action.isWrite) {
       // Writes get moved to the head of the list.
@@ -221,7 +228,11 @@ export default function(state = DEFAULT_DECK_STATE, action) {
           action.id,
           ...filter(state.myDecks, deckId => deck.previous_deck !== deckId),
         ],
-      });
+        dateUpdated: action.timestamp.getTime(),
+      },
+      action.id < 0 ? { dateLocalUpdated: action.timestamp.getTime() } : {},
+    );
   }
+  // Default action, do nothing.
   return state;
 }

@@ -66,9 +66,10 @@ export default class SettingsItem extends React.Component {
 
 const styles = StyleSheet.create({
   wrapper: {
-    padding: 4,
+    paddingLeft: 4,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-start',
     height: 40,
   },
   text: {

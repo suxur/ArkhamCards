@@ -155,6 +155,20 @@ export function getMyDecksState(state) {
   };
 }
 
+export function getLocalDecks(state) {
+  const localDecks = {};
+  forEach(keys(state.decks.all || {}), id => {
+    if (id < 0) {
+      localDecks[id] = state.decks.all[id];
+    }
+  });
+  return {
+    localDecks,
+    replacedLocalIds: state.decks.replacedLocalIds,
+    lastUpdated: state.decks.dateLocalUpdated || state.decks.dateUpdated,
+  };
+}
+
 export function getEffectiveDeckId(state, id) {
   const replacedLocalIds = state.decks.replacedLocalIds || {};
   if (replacedLocalIds[id]) {

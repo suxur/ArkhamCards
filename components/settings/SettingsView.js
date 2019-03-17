@@ -21,6 +21,7 @@ import { clearDecks } from '../../actions';
 import { fetchCards } from '../cards/actions';
 import { getAllDecks } from '../../reducers';
 import SettingsItem from './SettingsItem';
+import ICloudButton from './ICloudButton';
 import LoginButton from './LoginButton';
 import { COLORS } from '../../styles/colors';
 
@@ -137,6 +138,7 @@ class SettingsView extends React.Component {
             textStyle={Platform.OS === 'android' ? { color: COLORS.monza } : null}
           />
           <LoginButton settings />
+          <ICloudButton componentId={this.props.componentId} />
           <SettingsCategoryHeader
             title={L('Card Data')}
             textStyle={Platform.OS === 'android' ? { color: COLORS.monza } : null}

@@ -27,6 +27,7 @@ export function createWeaknessSet(id, name, packCodes) {
   return {
     type: NEW_WEAKNESS_SET,
     id,
+    timestamp: new Date(),
     set: {
       id,
       name,
@@ -41,6 +42,7 @@ export function editWeaknessSet(id, name, packCodes, assignedCards) {
   return {
     type: EDIT_WEAKNESS_SET,
     id: id,
+    timestamp: new Date(),
     name: name || null,
     packCodes: packCodes || null,
     assignedCards: assignedCards || null,
@@ -51,6 +53,7 @@ export function deleteWeaknessSet(id) {
   return {
     type: DELETE_WEAKNESS_SET,
     id: id,
+    timestamp: new Date(),
   };
 }
 
@@ -101,6 +104,7 @@ export function verifyLogin() {
 export function clearDecks() {
   return {
     type: CLEAR_DECKS,
+    timestamp: new Date(),
   };
 }
 
@@ -134,6 +138,7 @@ export function refreshMyDecks() {
       console.log(`ERROR: ${error.message || error}`);
       dispatch({
         type: MY_DECKS_ERROR,
+        timestamp: new Date(),
         error: error.message || error,
       });
     });
@@ -143,6 +148,7 @@ export function refreshMyDecks() {
 export function setNewDeck(id, deck) {
   return {
     type: NEW_DECK_AVAILABLE,
+    timestamp: new Date(),
     id,
     deck,
   };
@@ -151,6 +157,7 @@ export function setNewDeck(id, deck) {
 export function updateDeck(id, deck, isWrite) {
   return {
     type: UPDATE_DECK,
+    timestamp: new Date(),
     id,
     deck,
     isWrite,
@@ -160,6 +167,7 @@ export function updateDeck(id, deck, isWrite) {
 export function replaceLocalDeck(localId, deck) {
   return {
     type: REPLACE_LOCAL_DECK,
+    timestamp: new Date(),
     localId,
     deck,
   };
@@ -168,6 +176,7 @@ export function replaceLocalDeck(localId, deck) {
 export function removeDeck(id, deleteAllVersions) {
   return {
     type: DELETE_DECK,
+    timestamp: new Date(),
     id,
     deleteAllVersions: !!deleteAllVersions,
   };
@@ -209,6 +218,7 @@ export function fetchPublicDeck(id, useDeckEndpoint) {
 export function setInCollection(code, value) {
   return {
     type: SET_IN_COLLECTION,
+    timestamp: new Date(),
     code,
     value,
   };
@@ -217,6 +227,7 @@ export function setInCollection(code, value) {
 export function setCycleInCollection(cycle, value) {
   return {
     type: SET_IN_COLLECTION,
+    timestamp: new Date(),
     cycle,
     value,
   };
@@ -225,6 +236,7 @@ export function setCycleInCollection(cycle, value) {
 export function setPackSpoiler(code, value) {
   return {
     type: SET_PACK_SPOILER,
+    timestamp: new Date(),
     code,
     value,
   };
@@ -233,6 +245,7 @@ export function setPackSpoiler(code, value) {
 export function setCyclePackSpoiler(cycle, value) {
   return {
     type: SET_PACK_SPOILER,
+    timestamp: new Date(),
     cycle,
     value,
   };
@@ -241,6 +254,7 @@ export function setCyclePackSpoiler(cycle, value) {
 export function setAllPackSpoilers(spoilers) {
   return {
     type: SET_ALL_PACK_SPOILERS,
+    timestamp: new Date(),
     spoilers,
   };
 }
