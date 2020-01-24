@@ -1,5 +1,18 @@
 import React, { ReactNode } from 'react';
-import { concat, debounce, flatMap, filter, forEach, keys, isEqual, map, partition, random, sortBy, throttle, uniq } from 'lodash';
+import {
+  concat,
+  debounce,
+  flatMap,
+  filter,
+  forEach,
+  keys,
+  isEqual,
+  map,
+  partition,
+  random,
+  throttle,
+  uniq,
+} from 'lodash';
 import {
   ActivityIndicator,
   Animated,
@@ -34,7 +47,6 @@ import {
 import { getPackSpoilers, getPacksInCollection, getTabooSet, AppState } from '../../reducers';
 import Card from '../../data/Card';
 import { showCard, showCardSwipe } from '../navHelper';
-import { isSpecialCard } from '../../lib/parseDeck';
 import CardSearchResult from '../CardSearchResult';
 import { rowHeight } from '../CardSearchResult/constants';
 import CardSectionHeader, { rowHeaderHeight } from './CardSectionHeader';
@@ -360,14 +372,9 @@ class CardResultList extends React.Component<Props, State> {
     }
   }
 
-  bucketDeckCards(cards: Card[], type: string): CardBucket[] {
-    return this.bucketCards(cards, `deck-${type}`, true);
-  }
-
   bucketCards(
-    cards: Card[],
-    keyPrefix: string,
-    isDeck: boolean
+    cards: Results<Card> | Card[],
+    keyPrefix: string
   ): CardBucket[] {
     const {
       in_collection,
@@ -380,10 +387,7 @@ class CardResultList extends React.Component<Props, State> {
     let nonCollectionCards: Card[] = [];
     let currentBucket: CardBucket | null = null;
     cards.forEach(card => {
-      const header = CardResultList.headerForCard(
-        card,
-        isDeck ? SORT_BY_TYPE : sort
-      );
+      const header = CardResultList.headerForCard(card, sort);
       if (!currentBucket || currentBucket.title !== header) {
         if (currentBucket && nonCollectionCards.length > 0) {
           if (showNonCollection[currentBucket.id]) {
@@ -404,7 +408,7 @@ class CardResultList extends React.Component<Props, State> {
         results.push(currentBucket);
       }
       if (card && card.pack_code && (
-        isDeck ||
+        keyPrefix === 'deck' ||
         card.pack_code === 'core' ||
         in_collection[card.pack_code] ||
         this.props.showNonCollection)
@@ -475,31 +479,20 @@ class CardResultList extends React.Component<Props, State> {
     }
     const possibleDeckCards: Results<Card> = realm.objects<Card>('Card')
       .filtered(queryParts.join(' and '));
-    const deckCards: Results<Card> = termQuery ?
+    const deckCards: Results<Card> = (termQuery ?
       possibleDeckCards.filtered(termQuery, searchTerm) :
-      possibleDeckCards;
-    const splitDeckCards = partition(deckCards, card => isSpecialCard(card));
-    const specialCards = sortBy(splitDeckCards[0], card => card.sort_by_type || -1);
-    const normalCards = sortBy(splitDeckCards[1], card => card.sort_by_type || -1);
+      possibleDeckCards).sorted(this.getSort());
 
-    return concat(
-      this.bucketDeckCards(normalCards, 'normal'),
-      this.bucketDeckCards(specialCards, 'special')
-    );
+    return this.bucketCards(deckCards, 'deck');
   }
 
-  _updateResults = () => {
+  getCards(query?: string) {
     const {
       realm,
-      query,
       termQuery,
       searchTerm,
-      show_spoilers,
       tabooSetId,
     } = this.props;
-    this.setState({
-      loadingMessage: CardResultList.randomLoadingMessage(),
-    });
     let parsedSearchTerm = searchTerm;
     if (parsedSearchTerm) {
       // replace "smart" single and double quotes
@@ -507,7 +500,6 @@ class CardResultList extends React.Component<Props, State> {
         .replace(/[\u2018\u2019]/g, '\'')
         .replace(/[\u201C\u201D]/g, '"');
     }
-    const resultsKey = this.resultsKey();
     const queryCards: Results<Card> = (query ?
       realm.objects<Card>('Card').filtered(
         `(${query}) and ${Card.tabooSetQuery(tabooSetId)}`,
@@ -516,10 +508,22 @@ class CardResultList extends React.Component<Props, State> {
         Card.tabooSetQuery(tabooSetId)
       )
     );
-    const cards: Results<Card> = (termQuery ?
+    return (termQuery ?
       queryCards.filtered(termQuery, parsedSearchTerm) :
       queryCards
     ).sorted(this.getSort());
+  }
+
+  _updateResults = () => {
+    const {
+      query,
+      show_spoilers,
+    } = this.props;
+    this.setState({
+      loadingMessage: CardResultList.randomLoadingMessage(),
+    });
+    const resultsKey = this.resultsKey();
+    const cards: Results<Card> = this.getCards(query);
     const groupedCards = partition(
       cards,
       card => {
@@ -530,9 +534,9 @@ class CardResultList extends React.Component<Props, State> {
     this.setState({
       resultsKey: resultsKey,
       deckSections: this.deckSections(),
-      cards: this.bucketCards(groupedCards[0], 'cards', false),
+      cards: this.bucketCards(groupedCards[0], 'cards'),
       cardsCount: groupedCards[0].length,
-      spoilerCards: this.bucketCards(groupedCards[1], 'spoiler', false),
+      spoilerCards: this.bucketCards(groupedCards[1], 'spoiler'),
       spoilerCardsCount: groupedCards[1].length,
     });
   };

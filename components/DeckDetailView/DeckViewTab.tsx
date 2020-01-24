@@ -10,7 +10,18 @@ import {
 } from 'react-native';
 import { t } from 'ttag';
 
-import { Campaign, CardId, Deck, DeckMeta, DeckProblem, InvestigatorData, ParsedDeck, SplitCards, Slots, Trauma } from '../../actions/types';
+import {
+  Campaign,
+  CardId,
+  Deck,
+  DeckMeta,
+  DeckProblem,
+  InvestigatorData,
+  ParsedDeck,
+  SplitCards,
+  Slots,
+  Trauma,
+} from '../../actions/types';
 import { showCard, showCardSwipe } from '../navHelper';
 import ArkhamIcon from '../../assets/ArkhamIcon';
 import AppIcon from '../../assets/AppIcon';
@@ -420,21 +431,6 @@ export default class DeckViewTab extends React.Component<Props> {
     ];
   }
 
-  renderMetadata() {
-    const {
-      tabooSet,
-    } = this.props;
-    return (
-      <View style={styles.metadata}>
-        { !!tabooSet && (
-          <Text style={typography.small}>
-            { t`Taboo List: ${tabooSet.date_start}.` }
-          </Text>
-        ) }
-      </View>
-    );
-  }
-
   renderInvestigatorStats() {
     const {
       parsedDeck: {
@@ -483,6 +479,33 @@ export default class DeckViewTab extends React.Component<Props> {
     );
   }
 
+  renderAvailableExperienceButton() {
+    const {
+      parsedDeck: {
+        changes,
+      },
+      deck,
+      showEditNameDialog,
+      xpAdjustment,
+    } = this.props;
+    if (!changes) {
+      return null;
+    }
+    const adjustedXp = (deck.xp || 0) + xpAdjustment;
+    return (
+      <TouchableOpacity onPress={showEditNameDialog}>
+        <View style={styles.rowBetween}>
+          <Text style={typography.settingsLabel}>
+            { t`Experience` }
+          </Text>
+          <Text style={typography.settingsValue}>
+            { t`${changes.spentXp} of ${adjustedXp}` }
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
   renderInvestigatorOptions() {
     const {
       parsedDeck: {
@@ -499,7 +522,7 @@ export default class DeckViewTab extends React.Component<Props> {
       editable,
     } = this.props;
     return (
-      <View>
+      <View style={styles.optionsContainer}>
         { (tabooOpen || showTaboo || !!tabooSet) && (
           <TabooSetPicker
             open={tabooOpen}
@@ -519,6 +542,7 @@ export default class DeckViewTab extends React.Component<Props> {
           editWarning={!!deck.previous_deck}
           disabled={!editable}
         />
+        { this.renderAvailableExperienceButton() }
       </View>
     );
   }
@@ -567,16 +591,13 @@ export default class DeckViewTab extends React.Component<Props> {
         </View>
         <View style={styles.headerBlock}>
           { this.renderProblem() }
-          <View style={styles.container}>
-            { this.renderInvestigatorBlock() }
-            { isBig && (
-              <View style={[styles.column, styles.buttonColumn]}>
-                { buttons }
-              </View>
-            ) }
+          <View style={styles.containerWrapper}>
+            <View style={styles.container}>
+              { this.renderInvestigatorBlock() }
+            </View>
+            { this.renderInvestigatorOptions() }
           </View>
-          { this.renderInvestigatorOptions() }
-          { !isBig && buttons }
+          { buttons }
         </View>
       </View>
     );
@@ -594,7 +615,6 @@ export default class DeckViewTab extends React.Component<Props> {
       xpAdjustment,
       fontScale,
       showDeckUpgrade,
-      showEditNameDialog,
       editable,
     } = this.props;
     return (
@@ -609,7 +629,6 @@ export default class DeckViewTab extends React.Component<Props> {
         campaign={campaign}
         showTraumaDialog={showTraumaDialog}
         showDeckUpgrade={showDeckUpgrade}
-        showXpAdjustment={showEditNameDialog}
         investigatorDataUpdates={investigatorDataUpdates}
         xpAdjustment={xpAdjustment}
       />
@@ -650,11 +669,6 @@ const styles = StyleSheet.create({
   column: {
     flex: 1,
   },
-  buttonColumn: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   metadata: {
     flexDirection: 'column',
     justifyContent: 'center',
@@ -664,10 +678,20 @@ const styles = StyleSheet.create({
   image: {
     marginRight: s,
   },
+  containerWrapper: {
+    flexDirection: isBig ? 'row' : 'column',
+  },
   container: {
     marginLeft: s,
     marginRight: s,
     flexDirection: 'row',
+    flex: 1,
+  },
+  optionsContainer: {
+    marginLeft: s,
+    marginRight: s,
+    flexDirection: 'column',
+    flex: 1,
   },
   problemBox: {
     flex: 1,
@@ -685,5 +709,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-around',
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: s,
+    paddingBottom: s,
   },
 });

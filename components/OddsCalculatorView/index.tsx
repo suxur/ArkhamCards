@@ -56,20 +56,6 @@ interface State {
 }
 
 class OddsCalculatorView extends React.Component<Props, State> {
-  static get options() {
-    return {
-      topBar: {
-        title: {
-          text: t`Odds Calculator`,
-        },
-        backButton: {
-          title: t`Back`,
-          testID: t`Back`,
-        },
-      },
-    };
-  }
-
   _navEventListener?: EventSubscription;
 
   constructor(props: Props) {
@@ -83,11 +69,11 @@ class OddsCalculatorView extends React.Component<Props, State> {
       )
     ) || undefined;
 
-    const currentScenarioCard = (props.scenarioCards &&
-      currentScenario &&
-      find(props.scenarioCards, card => card.encounter_code === currentScenario.code)
-    );
-    const difficulty = props.campaign ? props.campaign.difficulty : undefined;
+    const {
+      currentScenarioCard,
+      difficulty,
+    } = this.currentScenarioState(currentScenario);
+
     this.state = {
       currentScenario,
       currentScenarioCard,
@@ -133,26 +119,37 @@ class OddsCalculatorView extends React.Component<Props, State> {
     });
   };
 
-  _scenarioChanged = (value: string) => {
+  currentScenarioState(currentScenario?: Scenario) {
     const {
       scenarioCards,
-      cycleScenarios,
       campaign,
     } = this.props;
     const difficulty = campaign ? campaign.difficulty : undefined;
-    const currentScenario = find(cycleScenarios, scenario => scenario.name === value);
-    const currentScenarioCard = scenarioCards &&
-      currentScenario &&
-      find(scenarioCards, card => card.encounter_code === currentScenario.code);
+    const encounterCode = currentScenario && (
+      currentScenario.code.startsWith('return_to_') ?
+        currentScenario.code.substring('return_to_'.length) :
+        currentScenario.code);
+    const currentScenarioCard = (scenarioCards && encounterCode) ?
+      find(scenarioCards, card => card.encounter_code === encounterCode) :
+      undefined;
     const specialTokenValues = OddsCalculatorView.parseSpecialTokenValues(
       currentScenarioCard,
       difficulty
     );
-    this.setState({
+    return {
       currentScenario,
       currentScenarioCard,
       specialTokenValues,
-    });
+      difficulty,
+    };
+  }
+
+  _scenarioChanged = (value: string) => {
+    const {
+      cycleScenarios,
+    } = this.props;
+    const currentScenario = find(cycleScenarios, scenario => scenario.name === value);
+    this.setState(this.currentScenarioState(currentScenario));
   };
 
   static parseSpecialTokenValues(
@@ -212,7 +209,7 @@ class OddsCalculatorView extends React.Component<Props, State> {
                     }
                   }
                 } else {
-                  const revealAnotherRegex = new RegExp(`\\[(${token})\\]:?\\sReveal another (chaos )? token.`);
+                  const revealAnotherRegex = new RegExp(`\\[(${token})\\]:?\\sReveal another (chaos )?token.`);
                   if (revealAnotherRegex.test(line)) {
                     scenarioTokens.push({
                       token,
@@ -407,13 +404,13 @@ class OddsCalculatorView extends React.Component<Props, State> {
           { this.renderContent() }
           <View style={styles.finePrint}>
             <Text style={typography.small}>
-              { t`Currently, this does not take into account scenario tokens that have a value of "-X" or tokens that make you draw additional tokens.` }
+              { t`Note: chaos tokens that cause additional tokens to be revealed does not show correct odds for the "Draw Two Pick One" and similar multi-draw situations.` }
             </Text>
           </View>
         </ScrollView>
         <View style={styles.footer}>
           <LinearGradient
-            colors={['#bdbdbd', '#ededed']}
+            colors={['#ededed', '#f0f0f0']}
             style={[styles.countRow, styles.footerRow]}
           >
             <Text style={typography.text}>{ t`Difficulty` }</Text>
