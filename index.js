@@ -3,12 +3,11 @@ import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { RealmProvider } from 'react-native-realm';
 import { Navigation } from 'react-native-navigation';
-import { ImageCacheProvider } from 'react-native-cached-image';
 
-import { registerScreens } from './app/screens';
-import configureStore from './app/store';
-import App from './app/App';
-import realm from './data';
+import { registerScreens } from './src/app/screens';
+import configureStore from './src/app/store';
+import App from './src/app/App';
+import realm from './src/data';
 
 class MyProvider extends React.Component {
   static propTypes = {
@@ -18,13 +17,11 @@ class MyProvider extends React.Component {
 
   render() {
     return (
-      <ImageCacheProvider>
-        <RealmProvider realm={realm}>
-          <Provider store={this.props.store}>
-            { this.props.children }
-          </Provider>
-        </RealmProvider>
-      </ImageCacheProvider>
+      <RealmProvider realm={realm}>
+        <Provider store={this.props.store}>
+          { this.props.children }
+        </Provider>
+      </RealmProvider>
     );
   }
 }
