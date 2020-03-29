@@ -1,4 +1,4 @@
-import { ChaosBag, ChaosTokenType, FactionCodeType, SkillCodeType, SlotCodeType } from '../constants';
+import { ChaosBag, ChaosTokenType, FactionCodeType, SkillCodeType, SlotCodeType } from 'constants';
 import { FilterState } from 'lib/filters';
 import Card from 'data/Card';
 
@@ -199,7 +199,10 @@ export const NEW_CHAOS_BAG_RESULTS = {
 
 export interface ChaosBagResults {
   drawnTokens: ChaosTokenType[];
-  sealedTokens: {id: string; icon: ChaosTokenType}[];
+  sealedTokens: {
+    id: string;
+    icon: ChaosTokenType;
+  }[];
   totalDrawnTokens: number;
 }
 
@@ -574,6 +577,94 @@ export interface RemoveFilterSetAction {
   id: string;
 }
 
+interface BasicInput {
+  scenario?: string;
+}
+
+export interface GuideSuppliesInput extends BasicInput {
+  type: 'supplies';
+  step: string;
+  supplies: {
+    [code: string]: {
+      [id: string]: number;
+    };
+  };
+}
+
+export interface GuideDecisionInput extends BasicInput {
+  type: 'decision';
+  step: string;
+  decision: boolean;
+}
+
+export interface GuideChoiceListInput extends BasicInput {
+  type: 'choice_list';
+  step: string;
+  choices: ListChoices;
+}
+
+export interface GuideCountInput extends BasicInput {
+  type: 'count';
+  step: string;
+  count: number;
+}
+
+export interface GuideChoiceInput extends BasicInput {
+  type: 'choice';
+  step: string;
+  choice: number;
+}
+
+export interface GuideStartScenarioInput extends BasicInput {
+  type: 'start_scenario';
+}
+
+export type GuideInput =
+  GuideSuppliesInput |
+  GuideDecisionInput |
+  GuideChoiceListInput |
+  GuideCountInput |
+  GuideChoiceInput |
+  GuideStartScenarioInput;
+
+export const GUIDE_RESET_SCENARIO = 'GUIDE_RESET_SCENARIO';
+export interface GuideResetScenarioAction {
+  type: typeof GUIDE_RESET_SCENARIO;
+  campaignId: number;
+  scenarioId: string;
+}
+
+export const GUIDE_SET_INPUT = 'GUIDE_SET_INPUT';
+export interface GuideSetInputAction {
+  type: typeof GUIDE_SET_INPUT;
+  campaignId: number;
+  input: GuideInput;
+}
+
+export const GUIDE_UNDO_INPUT = 'GUIDE_UNDO_INPUT';
+export interface GuideUndoInputAction {
+  type: typeof GUIDE_UNDO_INPUT;
+  campaignId: number;
+}
+
+export interface SupplyCounts {
+  [code: string]: {
+    [id: string]: number;
+  };
+}
+
+export interface ListChoices {
+  [code: string]: number[];
+}
+
+export interface CampaignGuideState {
+  inputs: GuideInput[];
+}
+
+export const DEFAULT_CAMPAIGN_GUIDE_STATE: CampaignGuideState = {
+  inputs: [],
+};
+
 export type FilterActions =
   ClearFilterAction |
   ToggleFilterAction |
@@ -621,3 +712,9 @@ export type CampaignActions =
   EditCampaignScenarioResultAction |
   SetAllCampaignsAction |
   UpdateChaosBagResultsAction;
+
+export type GuideActions =
+  LogoutAction |
+  GuideSetInputAction |
+  GuideUndoInputAction |
+  GuideResetScenarioAction;
